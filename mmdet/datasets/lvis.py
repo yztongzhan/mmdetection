@@ -265,6 +265,15 @@ class LVISDataset(CocoDataset):
         'yoke_(animal_equipment)', 'zebra', 'zucchini')
 
     def load_annotations(self, ann_file):
+        """Load annotation from lvis style annotation file
+
+        Args:
+            ann_file (str): Path of annotation file.
+
+        Returns:
+            list[dict]: Annotation info from LVIS api.
+        """
+
         try:
             from lvis import LVIS
         except ImportError:
@@ -278,7 +287,14 @@ class LVISDataset(CocoDataset):
         data_infos = []
         for i in self.img_ids:
             info = self.coco.load_imgs([i])[0]
-            info['filename'] = info['file_name']
+            if info['file_name'].startswith('COCO'):
+                # Convert form the COCO 2014 file naming convention of
+                # COCO_[train/val/test]2014_000000000000.jpg to the 2017
+                # naming convention of 000000000000.jpg
+                # (LVIS v1 will fix this naming issue)
+                info['filename'] = info['file_name'][-16:]
+            else:
+                info['filename'] = info['file_name']
             data_infos.append(info)
         return data_infos
 
@@ -291,9 +307,11 @@ class LVISDataset(CocoDataset):
                  proposal_nums=(100, 300, 1000),
                  iou_thrs=np.arange(0.5, 0.96, 0.05)):
         """Evaluation in LVIS protocol.
+
         Args:
-            results (list): Testing results of the dataset.
-            metric (str | list[str]): Metrics to be evaluated.
+            results (list[list | tuple]): Testing results of the dataset.
+            metric (str | list[str]): Metrics to be evaluated. Options are
+                'bbox', 'segm', 'proposal', 'proposal_fast'.
             logger (logging.Logger | str | None): Logger used for printing
                 related information during evaluation. Default: None.
             jsonfile_prefix (str | None):
@@ -304,9 +322,11 @@ class LVISDataset(CocoDataset):
             iou_thrs (Sequence[float]): IoU threshold used for evaluating
                 recalls. If set to a list, the average recall of all IoUs will
                 also be computed. Default: 0.5.
+
         Returns:
-            dict[str: float]
+            dict[str, float]: LVIS style metrics.
         """
+
         try:
             from lvis import LVISResults, LVISEval
         except ImportError:
