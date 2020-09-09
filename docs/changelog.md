@@ -1,5 +1,100 @@
 ## Changelog
 
+### v2.4.0 (5/9/2020)
+
+**Highlights**
+- Fix lots of issues/bugs and reorganize the trouble shooting page
+- Support new methods [SABL](https://arxiv.org/abs/1912.04260), [YOLOv3](https://arxiv.org/abs/1804.02767), and [PAA Assign](https://arxiv.org/abs/2007.08103)
+- Support Batch Inference
+- Start to publish `mmdet` package to PyPI since v2.3.0
+- Switch model zoo to download.openmmlab.com
+
+**Bug Fixes**
+- Fix default mean/std for onnx (#3491)
+- Fix coco evaluation and add metric items (#3497)
+- Fix typo for install.md (#3516)
+- Fix atss when sampler per gpu is 1 (#3528)
+- Fix import of fuse_conv_bn (#3529)
+- Fix bug of gaussian_target, update unittest of heatmap (#3543)
+- Fixed VOC2012 evaluate (#3553)
+- Fix scale factor bug of rescale (#3566)
+- Fix with_xxx_attributes in base detector (#3567)
+- Fix boxes scaling when number is 0 (#3575)
+- Fix rfp check when neck config is a list (#3591)
+- Fix import of fuse conv bn in benchmark.py (#3606)
+- Fix webcam demo (#3634)
+- Fix typo and itemize issues in tutorial (#3658)
+- Fix error in distributed training when some levels of FPN are not assigned with bounding boxes (#3670)
+
+**New Features**
+- Support Cutout augmentation (#3521)
+- Support evaluation on multiple datasets through ConcatDataset (#3522)
+- Support [PAA assign](https://arxiv.org/abs/2007.08103) #(3547)
+- Support eval metric with pickle results (#3607)
+- Support [YOLOv3](https://arxiv.org/abs/1804.02767) (#3083)
+- Support [SABL](https://arxiv.org/abs/1912.04260) (#3603)
+- Support Batch Inference (#3564)
+- Support to publish to Pypi in github-action (#3510)
+- Support RandomFlip with horizontal/vertical/diagonal direction (#3608)
+
+**Improvements**
+- Refactor common issues in documentation (#3530)
+- Add pytorch 1.6 to CI config (#3532)
+- Add config to runner meta (#3534)
+- Add eval-option flag for testing (#3537)
+- Add init_eval to evaluation hook (#3550)
+- Add include_bkg in ClassBalancedDataset (#3577)
+- Using config's loading in inference_detector (#3611)
+- Add atss 101 (#3639)
+- Support custom imports (#3641)
+- Update urls to download.openmmlab.com (#3665)
+
+
+### v2.3.0 (5/8/2020)
+
+**Highlights**
+- The CUDA/C++ operators have been moved to `mmcv.ops`. For backward compatibility `mmdet.ops` is kept as warppers of `mmcv.ops`.
+- Support new methods [CornerNet](https://arxiv.org/abs/1808.01244), [DIOU](https://arxiv.org/abs/1911.08287)/[CIOU](https://arxiv.org/abs/2005.03572) loss, and new dataset: [LVIS V1](https://arxiv.org/abs/1908.03195)
+- Provide more detailed colab training tutorials and more complete documentation.
+- Support to convert RetinaNet from Pytorch to ONNX.
+
+**Bug Fixes**
+- Fix the model initialization bug of DetectoRS (#3187)
+- Fix the bug of module names in NASFCOSHead (#3205)
+- Fix the filename bug in publish_model.py (#3237)
+- Fix the dimensionality bug when `inside_flags.any()` is `False` in dense heads (#3242)
+- Fix the bug of forgetting to pass flip directions in `MultiScaleFlipAug` (#3262)
+- Fixed the bug caused by default value of `stem_channels` (#3333)
+- Fix the bug of model checkpoint loading for CPU inference (#3318, #3316)
+- Fix topk bug when box number is smaller than the expected topk number in ATSSAssigner (#3361)
+- Fix the gt priority bug in center_region_assigner.py (#3208)
+- Fix NaN issue of iou calculation in iou_loss.py (#3394)
+- Fix the bug that `iou_thrs` is not actually used during evaluation in coco.py (#3407)
+- Fix test-time augmentation of RepPoints (#3435)
+- Fix runtimeError caused by incontiguous tensor in Res2Net+DCN (#3412)
+
+**New Features**
+- Support [CornerNet](https://arxiv.org/abs/1808.01244) (#3036)
+- Support [DIOU](https://arxiv.org/abs/1911.08287)/[CIOU](https://arxiv.org/abs/2005.03572) loss (#3151)
+- Support [LVIS V1](https://arxiv.org/abs/1908.03195) dataset (#)
+- Support customized hooks in training (#3395)
+- Support fp16 training of generalized focal loss (#3410)
+- Support to convert RetinaNet from Pytorch to ONNX (#3075)
+
+**Improvements**
+- Support to process ignore boxes in ATSS assigner (#3082)
+- Allow to crop images without ground truth in `RandomCrop` (#3153)
+- Enable the the `Accuracy` module to set threshold (#3155)
+- Refactoring unit tests (#3206)
+- Unify the training settings of `to_float32` and `norm_cfg` in RegNets configs (#3210)
+- Add colab training tutorials for beginners (#3213, #3273)
+- Move CUDA/C++ operators into `mmcv.ops` and keep `mmdet.ops` as warppers for backward compatibility (#3232)(#3457)
+- Update installation scripts in documentation (#3290) and dockerfile (#3320)
+- Support to set image resize backend (#3392)
+- Remove git hash in version file (#3466)
+- Check mmcv version to force version compatibility (#3460)
+
+
 ### v2.2.0 (1/7/2020)
 
 **Highlights**

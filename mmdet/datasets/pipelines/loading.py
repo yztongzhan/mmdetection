@@ -21,7 +21,7 @@ class LoadImageFromFile(object):
         to_float32 (bool): Whether to convert the loaded image to a float32
             numpy array. If set to False, the loaded image is an uint8 array.
             Defaults to False.
-        color_type (str): The flag argument for :func:`mmcv.imfrombytes()`.
+        color_type (str): The flag argument for :func:`mmcv.imfrombytes`.
             Defaults to 'color'.
         file_client_args (dict): Arguments to instantiate a FileClient.
             See :class:`mmcv.fileio.FileClient` for details.
@@ -78,6 +78,38 @@ class LoadImageFromFile(object):
 
 
 @PIPELINES.register_module()
+class LoadImageFromWebcam(LoadImageFromFile):
+    """Load an image from webcam.
+
+    Similar with :obj:`LoadImageFromFile`, but the image read from webcam is in
+    ``results['img']``.
+    """
+
+    def __call__(self, results):
+        """Call functions to add image meta information.
+
+        Args:
+            results (dict): Result dict with Webcam read image in
+                ``results['img']``.
+
+        Returns:
+            dict: The dict contains loaded image and meta information.
+        """
+
+        img = results['img']
+        if self.to_float32:
+            img = img.astype(np.float32)
+
+        results['filename'] = None
+        results['ori_filename'] = None
+        results['img'] = img
+        results['img_shape'] = img.shape
+        results['ori_shape'] = img.shape
+        results['img_fields'] = ['img']
+        return results
+
+
+@PIPELINES.register_module()
 class LoadMultiChannelImageFromFiles(object):
     """Load multi-channel images from a list of separate channel files.
 
@@ -91,7 +123,7 @@ class LoadMultiChannelImageFromFiles(object):
         to_float32 (bool): Whether to convert the loaded image to a float32
             numpy array. If set to False, the loaded image is an uint8 array.
             Defaults to False.
-        color_type (str): The flag argument for :func:`mmcv.imfrombytes()`.
+        color_type (str): The flag argument for :func:`mmcv.imfrombytes`.
             Defaults to 'color'.
         file_client_args (dict): Arguments to instantiate a FileClient.
             See :class:`mmcv.fileio.FileClient` for details.
@@ -319,7 +351,7 @@ class LoadAnnotations(object):
         return results
 
     def __call__(self, results):
-        """Call function to load multiple types annotations
+        """Call function to load multiple types annotations.
 
         Args:
             results (dict): Result dict from :obj:`mmdet.CustomDataset`.

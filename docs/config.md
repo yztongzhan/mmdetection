@@ -1,7 +1,7 @@
 # Config System
 We incorporate modular and inheritance design into our config system, which is convenient to conduct various experiments.
 If you wish to inspect the config file, you may run `python tools/print_config.py /PATH/TO/CONFIG` to see the complete config.
-You may also pass `--options xxx.yyy=zzz` to see updated config.
+You may also pass `--cfg-options xxx.yyy=zzz` to see updated config.
 
 ## Config File Structure
 
@@ -96,8 +96,8 @@ model = dict(
             type='SingleRoIExtractor',  # Type of the RoI feature extractor, most of methods uses SingleRoIExtractor. Refer to https://github.com/open-mmlab/mmdetection/blob/master/mmdet/models/roi_heads/roi_extractors/single_level.py#L10 for details.
             roi_layer=dict(  # Config of RoI Layer
                 type='RoIAlign',  # Type of RoI Layer, DeformRoIPoolingPack and ModulatedDeformRoIPoolingPack are also supported. Refer to https://github.com/open-mmlab/mmdetection/blob/master/mmdet/ops/roi_align/roi_align.py#L79 for details.
-                out_size=7,  # The output size of feature maps.
-                sample_num=0),  # Sampling ratio when extracting the RoI features. 0 means adaptive ratio.
+                output_size=7,  # The output size of feature maps.
+                sampling_ratio=0),  # Sampling ratio when extracting the RoI features. 0 means adaptive ratio.
             out_channels=256,  # output channels of the extracted feature.
             featmap_strides=[4, 8, 16, 32]),  # Strides of multi-scale feature maps. It should be consistent to the architecture of the backbone.
         bbox_head=dict(  # Config of box head in the RoIHead.
@@ -122,8 +122,8 @@ model = dict(
             type='SingleRoIExtractor',  # Type of the RoI feature extractor, most of methods uses SingleRoIExtractor.
             roi_layer=dict(  # Config of RoI Layer that extracts features for instance segmentation
                 type='RoIAlign',  # Type of RoI Layer, DeformRoIPoolingPack and ModulatedDeformRoIPoolingPack are also supported
-                out_size=14,  # The output size of feature maps.
-                sample_num=0),  # Sampling ratio when extracting the RoI features.
+                output_size=14,  # The output size of feature maps.
+                sampling_ratio=0),  # Sampling ratio when extracting the RoI features.
             out_channels=256,  # Output channels of the extracted feature.
             featmap_strides=[4, 8, 16, 32]),  # Strides of multi-scale feature maps.
         mask_head=dict(  # Mask prediction head
@@ -327,7 +327,9 @@ data = dict(
                     dict(type='ImageToTensor', keys=['img']),
                     dict(type='Collect', keys=['img'])
                 ])
-        ]))
+        ],
+        samples_per_gpu=2  # Batch size of a single GPU used in testing
+        ))
 evaluation = dict(  # The config to build the evaluation hook, refer to https://github.com/open-mmlab/mmdetection/blob/master/mmdet/core/evaluation/eval_hooks.py#L7 for more details.
     interval=1,  # Evaluation interval
     metric=['bbox', 'segm'])  # Metrics used during evaluation

@@ -20,9 +20,8 @@ def reduce_mean(tensor):
 
 @HEADS.register_module()
 class ATSSHead(AnchorHead):
-    """
-    Bridging the Gap Between Anchor-based and Anchor-free Detection via
-    Adaptive Training Sample Selection
+    """Bridging the Gap Between Anchor-based and Anchor-free Detection via
+    Adaptive Training Sample Selection.
 
     ATSS head structure is similar with FCOS, however ATSS use anchor boxes
     and assign label by Adaptive Training Sample Selection instead max-iou.
@@ -174,8 +173,8 @@ class ATSSHead(AnchorHead):
         """
 
         anchors = anchors.reshape(-1, 4)
-        cls_score = cls_score.permute(0, 2, 3,
-                                      1).reshape(-1, self.cls_out_channels)
+        cls_score = cls_score.permute(0, 2, 3, 1).reshape(
+            -1, self.cls_out_channels).contiguous()
         bbox_pred = bbox_pred.permute(0, 2, 3, 1).reshape(-1, 4)
         centerness = centerness.permute(0, 2, 3, 1).reshape(-1)
         bbox_targets = bbox_targets.reshape(-1, 4)
@@ -539,7 +538,7 @@ class ATSSHead(AnchorHead):
                            label_channels=1,
                            unmap_outputs=True):
         """Compute regression, classification targets for anchors in a single
-            image.
+        image.
 
         Args:
             flat_anchors (Tensor): Multi-level anchors of the image, which are
@@ -578,7 +577,7 @@ class ATSSHead(AnchorHead):
                                            img_meta['img_shape'][:2],
                                            self.train_cfg.allowed_border)
         if not inside_flags.any():
-            return (None, ) * 6
+            return (None, ) * 7
         # assign gt and sample anchors
         anchors = flat_anchors[inside_flags, :]
 

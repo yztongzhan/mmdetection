@@ -1,4 +1,3 @@
-import warnings
 from abc import ABCMeta, abstractmethod
 from collections import OrderedDict
 
@@ -14,7 +13,7 @@ from mmdet.utils import get_root_logger
 
 
 class BaseDetector(nn.Module, metaclass=ABCMeta):
-    """Base class for detectors"""
+    """Base class for detectors."""
 
     def __init__(self):
         super(BaseDetector, self).__init__()
@@ -30,30 +29,27 @@ class BaseDetector(nn.Module, metaclass=ABCMeta):
     @property
     def with_shared_head(self):
         """bool: whether the detector has a shared head in the RoI Head"""
-        return hasattr(self.roi_head,
-                       'shared_head') and self.roi_head.shared_head is not None
+        return hasattr(self, 'roi_head') and self.roi_head.with_shared_head
 
     @property
     def with_bbox(self):
         """bool: whether the detector has a bbox head"""
-        return ((hasattr(self.roi_head, 'bbox_head')
-                 and self.roi_head.bbox_head is not None)
+        return ((hasattr(self, 'roi_head') and self.roi_head.with_bbox)
                 or (hasattr(self, 'bbox_head') and self.bbox_head is not None))
 
     @property
     def with_mask(self):
         """bool: whether the detector has a mask head"""
-        return ((hasattr(self.roi_head, 'mask_head')
-                 and self.roi_head.mask_head is not None)
+        return ((hasattr(self, 'roi_head') and self.roi_head.with_mask)
                 or (hasattr(self, 'mask_head') and self.mask_head is not None))
 
     @abstractmethod
     def extract_feat(self, imgs):
-        """Extract features from images"""
+        """Extract features from images."""
         pass
 
     def extract_feats(self, imgs):
-        """Extract features from multiple images
+        """Extract features from multiple images.
 
         Args:
             imgs (list[torch.Tensor]): A list of images. The images are
@@ -89,11 +85,11 @@ class BaseDetector(nn.Module, metaclass=ABCMeta):
 
     @abstractmethod
     def aug_test(self, imgs, img_metas, **kwargs):
-        """Test function with test time augmentation"""
+        """Test function with test time augmentation."""
         pass
 
     def init_weights(self, pretrained=None):
-        """Initialize the weights in detector
+        """Initialize the weights in detector.
 
         Args:
             pretrained (str, optional): Path to pre-trained weights.
@@ -139,32 +135,32 @@ class BaseDetector(nn.Module, metaclass=ABCMeta):
         if num_augs != len(img_metas):
             raise ValueError(f'num of augmentations ({len(imgs)}) '
                              f'!= num of image meta ({len(img_metas)})')
-        # TODO: remove the restriction of samples_per_gpu == 1 when prepared
-        samples_per_gpu = imgs[0].size(0)
-        assert samples_per_gpu == 1
 
         if num_augs == 1:
-            """
-            proposals (List[List[Tensor]]): the outer list indicates test-time
-                augs (multiscale, flip, etc.) and the inner list indicates
-                images in a batch. The Tensor should have a shape Px4, where
-                P is the number of proposals.
-            """
+            # proposals (List[List[Tensor]]): the outer list indicates
+            # test-time augs (multiscale, flip, etc.) and the inner list
+            # indicates images in a batch.
+            # The Tensor should have a shape Px4, where P is the number of
+            # proposals.
             if 'proposals' in kwargs:
                 kwargs['proposals'] = kwargs['proposals'][0]
             return self.simple_test(imgs[0], img_metas[0], **kwargs)
         else:
+            assert imgs[0].size(0) == 1, 'aug test does not support ' \
+                                         'inference with batch size ' \
+                                         f'{imgs[0].size(0)}'
             # TODO: support test augmentation for predefined proposals
             assert 'proposals' not in kwargs
             return self.aug_test(imgs, img_metas, **kwargs)
 
     @auto_fp16(apply_to=('img', ))
     def forward(self, img, img_metas, return_loss=True, **kwargs):
-        """
-        Calls either forward_train or forward_test depending on whether
-        return_loss=True. Note this setting will change the expected inputs.
-        When `return_loss=True`, img and img_meta are single-nested (i.e.
-        Tensor and List[dict]), and when `resturn_loss=False`, img and img_meta
+        """Calls either :func:`forward_train` or :func:`forward_test` depending
+        on whether ``return_loss`` is ``True``.
+
+        Note this setting will change the expected inputs. When
+        ``return_loss=True``, img and img_meta are single-nested (i.e. Tensor
+        and List[dict]), and when ``resturn_loss=False``, img and img_meta
         should be double nested (i.e.  List[Tensor], List[List[dict]]), with
         the outer list indicating test time augmentations.
         """
@@ -181,8 +177,8 @@ class BaseDetector(nn.Module, metaclass=ABCMeta):
                 losses and other necessary infomation.
 
         Returns:
-            tuple[Tensor, dict]: (loss, log_vars), loss is the loss tensor
-                which may be a weighted sum of all losses, log_vars contains
+            tuple[Tensor, dict]: (loss, log_vars), loss is the loss tensor \
+                which may be a weighted sum of all losses, log_vars contains \
                 all the variables to be sent to the logger.
         """
         log_vars = OrderedDict()
@@ -224,14 +220,15 @@ class BaseDetector(nn.Module, metaclass=ABCMeta):
                 and reserved.
 
         Returns:
-            dict: It should contain at least 3 keys: ``loss``, ``log_vars``,
+            dict: It should contain at least 3 keys: ``loss``, ``log_vars``, \
                 ``num_samples``.
-                ``loss`` is a tensor for back propagation, which can be a
+
+                - ``loss`` is a tensor for back propagation, which can be a \
                 weighted sum of multiple losses.
-                ``log_vars`` contains all the variables to be sent to the
+                - ``log_vars`` contains all the variables to be sent to the
                 logger.
-                ``num_samples`` indicates the batch size (when the model is
-                DDP, it means the batch size on each GPU), which is used for
+                - ``num_samples`` indicates the batch size (when the model is \
+                DDP, it means the batch size on each GPU), which is used for \
                 averaging the logs.
         """
         losses = self(**data)
@@ -340,6 +337,4 @@ class BaseDetector(nn.Module, metaclass=ABCMeta):
             out_file=out_file)
 
         if not (show or out_file):
-            warnings.warn('show==False and out_file is not specified, only '
-                          'result image will be returned')
             return img
